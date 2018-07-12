@@ -7,6 +7,7 @@
 #SBATCH --tasks-per-node=16
 
 module load hpc/2015 anaconda/2.3.0
+
 export I_MPI_PMI_LIBRARY=/p/system/slurm/lib/libpmi.so
 
 ##################
@@ -15,5 +16,5 @@ echo "SLURM JOB ID: $SLURM_JOBID"
 echo "$SLURM_NTASKS tasks"
 echo "------------------------------------------------------------"
 
-srun -n $SLURM_NTASKS python finalValues_constantDeltaT.py 0
+srun --mpi=pmi2 -n $SLURM_NTASKS python finalValues_constantDeltaT.py 0
 

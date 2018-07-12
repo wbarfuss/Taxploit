@@ -33,7 +33,7 @@ def run_networkGrid(parameterList,
                     networkGerneratingFunction,
                     sampleSize=200,
                     savePath='/p/tmp/geier/default',
-                    redo=False, networkParameterUser=[600, 60, 0.1], networkParameterGa=[60, 6, 0.1]):
+                    redo=False, networkParameterUser=[600, 0.1, 0.1], networkParameterGa=[60, 0.1, 0.1]):
 
         # Check constantVariable to initilize the to be varied parameters
 
@@ -61,12 +61,13 @@ def run_networkGrid(parameterList,
             conTime = []
 
             for parameter in variParameter:
+                #print("computing ", parameter)
 
                 if isfile(savePathNameTime) and not redo:
                     continue
 
                 userData, gaData, time = calc_finalValue(parameter[0], parameter[1], parameter[2], networkParameterUser=networkParameterUser,
-                                                        networkParameterGa=networkParameterGa, networkGerneratingFunction=networkGerneratingFunction)
+                                                         networkParameterGa=networkParameterGa, networkGerneratingFunction=networkGerneratingFunction)
 
                 susUser.append(userData)
                 susGa.append(gaData)
@@ -78,23 +79,33 @@ def run_networkGrid(parameterList,
 
             # ppData = [np.mean(userPP), np.mean(gaPP)]
             # pkl.dump(ppData, open(savePathName, 'wb'))
-            np.save(savePathNameFracUser, susUser)
-            np.save(savePathNameFracGA, susGa)
-            np.save(savePathNameTime, conTime)
+
+            print("Saving: ", constantValue, runNumber)
+            print("Shape of susUser: " + str(susUser.shape))
+            print("Shape of susGa: " + str(susGa.shape))
+            print("Shape of conTime: " + str(conTime.shape))
+            #np.save(savePathNameFracUser, susUser)
+            #np.save(savePathNameFracGA, susGa)
+            #np.save(savePathNameTime, conTime)
+            pkl.dump(susUser, open(savePathNameFracUser, "wb"))
+            pkl.dump(susGa, open(savePathNameFracGA, "wb"))
+            pkl.dump(conTime, open(savePathNameTime, "wb"))
+            print("Saved")
 
 
 def calc_finalValue(phi=0.3,
                     tau=0.3,
                     taxation_factor=0.6,
-                    networkParameterUser=[600, 60, 0.1],
-                    networkParameterGa=[60, 6, 0.1],
+                    networkParameterUser=[600, 0.1, 0.1],
+                    networkParameterGa=[60, 0.1, 0.1],
                     networkGerneratingFunction=nx.watts_strogatz_graph,
                     verbose=False):
 
-    networkParameterUser = list(networkParameterUser)
-    networkParameterUser[1] = int(networkParameterUser[1] * networkParameterUser[0])
-    networkParameterGa = list(networkParameterGa)
-    networkParameterGa[1] = int(networkParameterGa[1] * networkParameterGa[0])
+    # from link density to mean degree
+    #networkParameterUser = list(networkParameterUser)
+    #networkParameterUser[1] = int(networkParameterUser[1] * networkParameterUser[0])
+    #networkParameterGa = list(networkParameterGa)
+    #networkParameterGa[1] = int(networkParameterGa[1] * networkParameterGa[0])
 
     adjacency_matrix_agents = nx.adj_matrix(networkGerneratingFunction(*networkParameterUser)).toarray()
 
@@ -105,7 +116,7 @@ def calc_finalValue(phi=0.3,
     rewiring_prob_agents = phi
     rewiring_prob_states = phi
     update_timescale_agents = tau
-    update_timescale_states = tau * (N_agents / N_states)**3
+    update_timescale_states = tau * (N_agents / N_states)**2
     taxation_factor = taxation_factor
 
     if type(adjacency_matrix_agents[0][0]) != np.int64:
@@ -168,7 +179,7 @@ def calc_finalValue(phi=0.3,
 def get_savePathName(constantVariable='dummy', constantValue=100, QoI='dummy', sampleRun=999,
                     savePath='/p/tmp/geier/default'):
 
-        fileName = constantVariable + '_' + str(constantValue) + '_' + QoI + '_run_' + str(sampleRun) + '.npy'
+        fileName = constantVariable + '_' + str(constantValue) + '_' + QoI + '_run_' + str(sampleRun) + '.pkl'
         fileName.replace('.', 'o')
         savePath = join(savePath, fileName)
         return savePath
@@ -198,8 +209,15 @@ if __name__ == '__main__':
     # savePath = 'savePathLambda'
     userNodes_arr = 600  # Btw.: len(range(225, 701, 25)) == 20
     gaNodes_arr = 60
-    link_density = 0.25
-    initalRew = 0.5
+    
+    # TESTING TESTING TESTING ====================== ##
+    userNodes_arr = 200
+    gaNodes_arr = 20
+    # savePath = "../TestData/constantDeltaT"
+    # ============================================== ##
+    
+    link_density = 0.05
+    # initalRew = 0.5
 
     # constantVariable = ['deltaT']  # one possiblity of three!
     # constantValue = [0., 0.5, 1.]  # np.linspace(0.02, 2., 100)
@@ -216,8 +234,13 @@ if __name__ == '__main__':
 
     sampleRuns = np.arange(100)  # 100 sample runs
 
-    networkGerneratingFunction = nx.watts_strogatz_graph
+    # TESTING TESTING TESTING ====================== ##
+    # sampleRuns = np.arange(3)  # 100 sample runs
+    # ============================================== ##
 
+    networkGerneratingFunction = nx.watts_strogatz_graph
+    networkGerneratingFunction = nx.erdos_renyi_graph
+    
     # list(it.product(phi_arr, tau_arr, tax_arr, userNetworkParameter_Iterator, gaNetworkParameter_Iterator))
     parameterList = list(it.product(constantVariable, constantValue, QoI, sampleRuns))
     # constantVariable, constantValue, QoI, runNumber = parameter
@@ -233,4 +256,7 @@ if __name__ == '__main__':
     print (comm.rank, len(parameterList))
 
     print("Starting the simulation; Rank: {}".format(comm.Get_rank()))
-    run_networkGrid(parameterList, networkGerneratingFunction=networkGerneratingFunction, savePath=savePath, networkParameterUser=[userNodes_arr, link_density, initalRew], networkParameterGa=[gaNodes_arr, link_density, initalRew])
+    nwParamUser=[userNodes_arr, link_density]
+    nwParamGa=[gaNodes_arr, link_density]
+    run_networkGrid(parameterList, networkGerneratingFunction=networkGerneratingFunction, savePath=savePath,
+                    networkParameterUser=nwParamUser, networkParameterGa=nwParamGa)

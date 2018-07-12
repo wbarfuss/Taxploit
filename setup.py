@@ -8,8 +8,10 @@ import numpy as np
 try:
     from Cython.Build import cythonize
     CYTHON = True
+    print "Do the cython"
 except ImportError:
     CYTHON = False
+    print "NO Cython"
 
 extensions = [
     Extension('*', ['cyexploit/*.%s' % ('pyx' if CYTHON else 'c')],
