@@ -233,4 +233,5 @@ if __name__ == '__main__':
     print (comm.rank, len(parameterList))
 
     print("Starting the simulation; Rank: {}".format(comm.Get_rank()))
-    run_networkGrid(parameterList, networkGerneratingFunction=networkGerneratingFunction, savePath=savePath, networkParameterUser=[userNodes_arr, link_density, initalRew], networkParameterGa=[gaNodes_arr, link_density, initalRew])
+    run_networkGrid(parameterList, networkGerneratingFunction=networkGerneratingFunction, savePath=savePath, 
+        networkParameterUser=[userNodes_arr, link_density, initalRew], networkParameterGa=[gaNodes_arr, link_density, initalRew], redo=True)

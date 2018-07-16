@@ -259,4 +259,4 @@ if __name__ == '__main__':
     nwParamUser=[userNodes_arr, link_density]
     nwParamGa=[gaNodes_arr, link_density]
     run_networkGrid(parameterList, networkGerneratingFunction=networkGerneratingFunction, savePath=savePath,
-                    networkParameterUser=nwParamUser, networkParameterGa=nwParamGa)
+                    networkParameterUser=nwParamUser, networkParameterGa=nwParamGa, redo=True)
