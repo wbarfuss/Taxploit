@@ -182,8 +182,8 @@ def avoidDoubleCalculation(parameterList, savePath, redo=False):
     newParameterList = []
     for parameter in parameterList:
         constantVariable, constantValue, QuI, runNumber = parameter
-        savePathName = get_savePathName(constantVariable, constantValue, 'consensusTime', runNumber, savePath)
-        if not isfile(savePathName) or redo:                               # Ugly but it should work. Make sure that consensusTime file is saved last
+        savePathName = get_savePathName(constantVariable, constantValue, 'consensTime', runNumber, savePath)
+        if not isfile(savePathName) or redo:                               # Ugly but it should work. Make sure that consensTime file is saved last
             newParameterList.append(parameter)
 
     return newParameterList
@@ -212,8 +212,9 @@ if __name__ == '__main__':
     constantVariable = ['phi']
     constantValue = [0., 0.4, 0.8]  # np.linspace(0.0, 1., 101)
 
-    QoI = ['fracSus', 'consensTime']  # This might not be a good idea as they are computed in the same run.
+    QoI = ['fracSus']  # Legacy Code.... Shouldn't really matter...
 
+    
     sampleRuns = np.arange(100)  # 100 sample runs
 
     networkGerneratingFunction = nx.watts_strogatz_graph
